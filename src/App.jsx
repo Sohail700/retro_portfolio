@@ -283,46 +283,19 @@ const copyToClipboard = (text, cb) =>
 // ─── PIXEL AVATAR ─────────────────────────────────────────────────────────────
 // ─── PIXEL AVATAR ─────────────────────────────────────────────────────────────
 const PixelAvatar = () => (
-  <svg
-    width="88"
-    height="88"
-    viewBox="0 0 18 18"
+  <img
+    src="/cat.jpg" // put your image name here
+    alt="logo"
+    width={88}
+    height={88}
     style={{
       imageRendering: "pixelated",
       border: `1px solid ${T.dim}`,
       background: T.card,
       flexShrink: 0,
+      objectFit: "cover",
     }}
-  >
-    <rect x="4" y="1" width="10" height="2" fill={T.dim} />
-    <rect x="2" y="3" width="14" height="8" fill={T.amber} opacity=".5" />
-
-    {/* Animated Blinking Eyes */}
-    <rect
-      x="5"
-      y="5"
-      width="2"
-      height="2"
-      fill={T.bg}
-      style={{ transformOrigin: "center", animation: "blinkEye 4s infinite" }}
-    />
-    <rect
-      x="11"
-      y="5"
-      width="2"
-      height="2"
-      fill={T.bg}
-      style={{ transformOrigin: "center", animation: "blinkEye 4s infinite" }}
-    />
-
-    <rect x="6" y="9" width="6" height="1" fill={T.bg} />
-    <rect x="7" y="10" width="4" height="1" fill={T.bg} />
-    <rect x="3" y="12" width="12" height="5" fill={T.amber} opacity=".3" />
-    <rect x="6" y="12" width="2" height="2" fill={T.bg} opacity=".6" />
-    <rect x="10" y="12" width="2" height="2" fill={T.bg} opacity=".6" />
-    <rect x="2" y="3" width="1" height="8" fill={T.dim} opacity=".5" />
-    <rect x="15" y="3" width="1" height="8" fill={T.dim} opacity=".5" />
-  </svg>
+  />
 );
 
 // ─── SMALL UI ─────────────────────────────────────────────────────────────────
