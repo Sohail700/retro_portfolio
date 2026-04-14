@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-
+import emailjs from '@emailjs/browser';
 // ─── THEME ────────────────────────────────────────────────────────────────────
 const T = {
   bg: "#0a0700",
@@ -1867,17 +1867,45 @@ function ContactView({ toast }) {
             onChange={(e) => setMsg(e.target.value)}
           />
           <div style={{ display: "flex", gap: 6 }}>
+            {/* --- EMAILJS INTEGRATION STARTS HERE --- */}
             <Btn
               variant="primary"
               onClick={() => {
                 if (name && msg) {
-                  setSent(true);
-                  toast("📡 Message transmitted!");
-                } else toast("Fill in name and message first.");
+                  const templateParams = {
+                    from_name: name,
+                    reply_to: email,
+                    message: msg,
+                    to_email: "Sohail.khan196in@gmail.com",
+                  };
+
+                  emailjs
+                    .send(
+                      "service_u27zfys", // <-- Replace this
+                      "template_7wafwzb", // <-- Replace this
+                      templateParams,
+                      "ehlelRhE9QIOJpwuB", // <-- Replace this
+                    )
+                    .then((response) => {
+                      setSent(true);
+                      toast("📡 Message transmitted!");
+                      setName("");
+                      setEmail("");
+                      setMsg("");
+                    })
+                    .catch((err) => {
+                      console.error("FAILED...", err);
+                      toast("Transmission failed.");
+                    });
+                } else {
+                  toast("Fill in name and message first.");
+                }
               }}
             >
               [↵] Transmit
             </Btn>
+            {/* --- EMAILJS INTEGRATION ENDS HERE --- */}
+
             <Btn
               onClick={() => {
                 setName("");
