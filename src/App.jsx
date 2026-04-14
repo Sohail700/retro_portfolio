@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import emailjs from '@emailjs/browser';
+import emailjs from "@emailjs/browser";
 // ─── THEME ────────────────────────────────────────────────────────────────────
 const T = {
   bg: "#0a0700",
