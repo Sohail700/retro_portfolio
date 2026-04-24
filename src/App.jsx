@@ -1165,7 +1165,7 @@ function ProfileView({ toast, isMobile }) {
         {[
           `> Final-year B.Tech CSE @ Amity University UP, Greater Noida`,
           `> Specialization: Artificial Intelligence & Cloud Computing`,
-          `> CGPA: 7.62 / 10 · Enrollment: A41105222029`,
+          `> CGPA: 7.62 / 10 `,
           `> Expected Graduation: June 2026`,
           `> Interned at: Saral Tech · The Spark Foundation · Codesoft`,
           `> Learning: French language · Urdu script · Blender 3D`,
