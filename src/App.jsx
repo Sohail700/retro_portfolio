@@ -1071,10 +1071,10 @@ function ProfileView({ toast, isMobile }) {
                       letterSpacing: 1,
                     }}
                   >
-                    @sohail_khan
+                    sohail khan
                   </span>
                   <div style={{ color: T.dim, fontSize: 10 }}>
-                    Since Sept 2022
+                    Free Palestine
                   </div>
                 </div>
               </div>
@@ -1096,11 +1096,26 @@ function ProfileView({ toast, isMobile }) {
                     letterSpacing: 1,
                   }}
                 >
-                  @sohail_khan{" "}
-                  <span style={{ opacity: 0.4, fontSize: 12 }}>◎L⌇</span>
+                  sohail khan{" "}
+                  <span style={{ opacity: 0.4, fontSize: 15 }}>◎</span>
                 </span>
-                <span style={{ color: T.dim, fontSize: 10 }}>
-                  Since Sept 2022
+
+                {/* Free Palestine clickable */}
+                <span
+                  onClick={() => {
+                    window.location.href =
+                      "https://donate.unrwa.org/int/en/general";
+                  }}
+                  style={{
+                    color: "#e0aa50", // neon vibe (fits your retro UI)
+                    fontSize: 10,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                  }}
+                >
+                  🇵🇸 Free Palestine
                 </span>
               </div>
             )}
@@ -1164,13 +1179,12 @@ function ProfileView({ toast, isMobile }) {
         </div>
         {[
           `> Final-year B.Tech CSE @ Amity University UP, Greater Noida`,
-          `> Specialization: Artificial Intelligence & Cloud Computing`,
+          `> Specialization: Software Development, AI&ML, Linux & Cloud Computing`,
           `> CGPA: 7.62 / 10 `,
           `> Expected Graduation: June 2026`,
-          `> Interned at: Saral Tech · The Spark Foundation · Codesoft`,
+          `> Job/Interned at: Saral Tech · The Spark Foundation · Codesoft`,
           `> Learning: French language · Urdu script · Blender 3D`,
-          `> Instagram: Islamic reflections & Quranic content`,
-          `> Surah Ash-Sharh (94:5-6): With every hardship comes ease ∞`,
+          `> "With every hardship comes ease"(94:5-6)`,
         ].map((l, i) => (
           <div
             key={i}
