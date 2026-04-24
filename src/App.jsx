@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import emailjs from "@emailjs/browser";
+
 // ─── THEME ────────────────────────────────────────────────────────────────────
 const T = {
   bg: "#0a0700",
@@ -14,26 +15,58 @@ const T = {
   success: "#4a9a4a",
   error: "#792f2f",
 };
-
+const FS = {
+  xs: "0.75rem",
+  sm: "0.85rem",
+  md: "1rem",
+  lg: "1.2rem",
+  xl: "1.5rem",
+};
 const GLOBAL_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap');
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body, #root { height: 100%; overflow: hidden; background: ${T.bg}; }
+
+  *, *::before, *::after { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+  }
+
+  html { 
+    font-size: 19px; /* 🔥 master control */
+  }
+
+  body, #root { 
+    height: 100%; 
+    overflow: hidden; 
+    background: ${T.bg}; 
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* 🔥 FORCE GLOBAL TEXT SCALING */
+  * {
+    font-size: 1rem;
+  }
+
   ::-webkit-scrollbar { width: 3px; }
   ::-webkit-scrollbar-track { background: ${T.bg}; }
   ::-webkit-scrollbar-thumb { background: ${T.dim}; }
   ::selection { background: ${T.amber}; color: ${T.bg}; }
-  input, textarea, button { font-family: 'Share Tech Mono', monospace; }
-  @keyframes blink   { 0%,100%{opacity:1} 50%{opacity:0} }
-  @keyframes fadeIn  { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
-  @keyframes glow    { 0%,100%{text-shadow:0 0 4px #d97f0a} 50%{text-shadow:0 0 16px #ffaa33,0 0 30px #d97f0a} }
-  @keyframes flicker { 0%,100%{opacity:1} 93%{opacity:.93} 96%{opacity:.97} }
-  @keyframes pulse   { 0%,100%{box-shadow:0 0 0 0 #4a9a4a44} 50%{box-shadow:0 0 0 5px transparent} }
-  @keyframes bootBar { from{width:0} to{width:100%} }
-  @keyframes blinkEye { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
-  @keyframes typeIn  { from{opacity:0;transform:translateY(3px)} to{opacity:1;transform:translateY(0)} }
-  @keyframes spin    { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+  input, textarea, button { 
+    font-family: 'Share Tech Mono', monospace; 
+    font-size: 1rem;
+  }
 `;
+// ─── RESPONSIVE HOOK ──────────────────────────────────────────────────────────
+function useWindowWidth() {
+  const [w, setW] = useState(window.innerWidth);
+  useEffect(() => {
+    const h = () => setW(window.innerWidth);
+    window.addEventListener("resize", h);
+    return () => window.removeEventListener("resize", h);
+  }, []);
+  return w;
+}
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 const PROJECTS = [
@@ -281,13 +314,12 @@ const copyToClipboard = (text, cb) =>
     .catch(() => cb("Copy failed"));
 
 // ─── PIXEL AVATAR ─────────────────────────────────────────────────────────────
-// ─── PIXEL AVATAR ─────────────────────────────────────────────────────────────
-const PixelAvatar = () => (
+const PixelAvatar = ({ size = 88 }) => (
   <img
-    src="/cat.jpg" // put your image name here
+    src="/cat.jpg"
     alt="logo"
-    width={88}
-    height={88}
+    width={size}
+    height={size}
     style={{
       imageRendering: "pixelated",
       border: `1px solid ${T.dim}`,
@@ -433,6 +465,7 @@ function BootScreen({ onDone }) {
         justifyContent: "center",
         zIndex: 9999,
         fontFamily: "'Share Tech Mono',monospace",
+        padding: "0 20px",
       }}
     >
       <div
@@ -447,7 +480,7 @@ function BootScreen({ onDone }) {
       >
         S☉hail
       </div>
-      <div style={{ width: 440, maxWidth: "90vw", marginBottom: 20 }}>
+      <div style={{ width: "100%", maxWidth: 440, marginBottom: 20 }}>
         {lines.map((l, i) => (
           <div
             key={i}
@@ -463,7 +496,7 @@ function BootScreen({ onDone }) {
           </div>
         ))}
       </div>
-      <div style={{ width: 440, maxWidth: "90vw" }}>
+      <div style={{ width: "100%", maxWidth: 440 }}>
         <div style={{ background: T.ghost, height: 4, marginBottom: 5 }}>
           <div
             style={{
@@ -482,18 +515,19 @@ function BootScreen({ onDone }) {
 }
 
 // ─── TOASTS ───────────────────────────────────────────────────────────────────
-function Toasts({ items }) {
+function Toasts({ items, isMobile }) {
   return (
     <div
       style={{
         position: "fixed",
-        bottom: 38,
+        bottom: isMobile ? 70 : 38,
         right: 14,
         zIndex: 8888,
         display: "flex",
         flexDirection: "column-reverse",
         gap: 5,
         pointerEvents: "none",
+        maxWidth: isMobile ? "calc(100vw - 28px)" : 280,
       }}
     >
       {items.map((t) => (
@@ -506,7 +540,6 @@ function Toasts({ items }) {
             padding: "7px 14px",
             fontSize: 11,
             animation: "fadeIn 0.2s ease",
-            maxWidth: 280,
           }}
         >
           {t.msg}
@@ -538,7 +571,7 @@ function CommandPalette({ onClose, onNav }) {
         display: "flex",
         alignItems: "flex-start",
         justifyContent: "center",
-        paddingTop: 80,
+        paddingTop: 60,
       }}
       onClick={onClose}
     >
@@ -546,8 +579,7 @@ function CommandPalette({ onClose, onNav }) {
         style={{
           background: T.panel,
           border: `1px solid ${T.dim}`,
-          width: 500,
-          maxWidth: "94vw",
+          width: "min(500px, 94vw)",
           animation: "fadeIn 0.14s ease",
         }}
         onClick={(e) => e.stopPropagation()}
@@ -630,19 +662,20 @@ function CommandPalette({ onClose, onNav }) {
 }
 
 // ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
-function NotifPanel({ notifs, setNotifs, onClose }) {
+function NotifPanel({ notifs, setNotifs, onClose, isMobile }) {
   return (
     <div
       style={{
         position: "fixed",
-        top: 32,
+        top: isMobile ? 0 : 32,
         right: 0,
-        width: 310,
+        left: isMobile ? 0 : "auto",
+        width: isMobile ? "100%" : 310,
         background: T.panel,
         border: `1px solid ${T.dim}`,
         zIndex: 6000,
         animation: "fadeIn 0.14s ease",
-        maxHeight: "80vh",
+        maxHeight: isMobile ? "70vh" : "80vh",
         display: "flex",
         flexDirection: "column",
       }}
@@ -736,7 +769,7 @@ function NotifPanel({ notifs, setNotifs, onClose }) {
 }
 
 // ─── SETTINGS PANEL ───────────────────────────────────────────────────────────
-function SettPanel({ s, setS, onClose }) {
+function SettPanel({ s, setS, onClose, isMobile }) {
   const row = (label, key, type = "bool") => (
     <div
       style={{
@@ -789,9 +822,11 @@ function SettPanel({ s, setS, onClose }) {
     <div
       style={{
         position: "fixed",
-        top: 32,
+        top: isMobile ? "auto" : 32,
+        bottom: isMobile ? 60 : "auto",
         right: 0,
-        width: 270,
+        left: isMobile ? 0 : "auto",
+        width: isMobile ? "100%" : 270,
         background: T.panel,
         border: `1px solid ${T.dim}`,
         zIndex: 6000,
@@ -994,7 +1029,7 @@ function Terminal() {
             outline: "none",
             caretColor: T.bright,
           }}
-          placeholder="type a command... (Tab to complete)"
+          placeholder="type a command..."
         />
       </div>
     </div>
@@ -1002,37 +1037,73 @@ function Terminal() {
 }
 
 // ─── PROFILE ──────────────────────────────────────────────────────────────────
-function ProfileView({ toast }) {
+function ProfileView({ toast, isMobile }) {
   return (
     <div style={{ animation: "fadeIn 0.2s ease" }}>
       <SH t="Profile" />
       <Card>
-        <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-          <PixelAvatar />
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                flexWrap: "wrap",
-                gap: 4,
-              }}
-            >
-              <span
+        <div
+          style={{
+            display: "flex",
+            gap: 14,
+            alignItems: "flex-start",
+            flexWrap: isMobile ? "wrap" : "nowrap",
+          }}
+        >
+          {!isMobile && <PixelAvatar />}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {isMobile && (
+              <div
                 style={{
-                  color: T.bright,
-                  fontSize: 16,
-                  fontFamily: "'VT323',monospace",
-                  letterSpacing: 1,
+                  display: "flex",
+                  gap: 12,
+                  alignItems: "center",
+                  marginBottom: 10,
                 }}
               >
-                @sohail_khan{" "}
-                <span style={{ opacity: 0.4, fontSize: 12 }}>◎L⌇</span>
-              </span>
-              <span style={{ color: T.dim, fontSize: 10 }}>
-                Since Sept 2022
-              </span>
-            </div>
+                <PixelAvatar size={64} />
+                <div>
+                  <span
+                    style={{
+                      color: T.bright,
+                      fontSize: 18,
+                      fontFamily: "'VT323',monospace",
+                      letterSpacing: 1,
+                    }}
+                  >
+                    @sohail_khan
+                  </span>
+                  <div style={{ color: T.dim, fontSize: 10 }}>
+                    Since Sept 2022
+                  </div>
+                </div>
+              </div>
+            )}
+            {!isMobile && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: 4,
+                }}
+              >
+                <span
+                  style={{
+                    color: T.bright,
+                    fontSize: 16,
+                    fontFamily: "'VT323',monospace",
+                    letterSpacing: 1,
+                  }}
+                >
+                  @sohail_khan{" "}
+                  <span style={{ opacity: 0.4, fontSize: 12 }}>◎L⌇</span>
+                </span>
+                <span style={{ color: T.dim, fontSize: 10 }}>
+                  Since Sept 2022
+                </span>
+              </div>
+            )}
             <div
               style={{
                 marginTop: 6,
@@ -1118,13 +1189,12 @@ function ProfileView({ toast }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3,1fr)",
+          gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(3,1fr)",
           gap: 8,
         }}
       >
         {[
           { label: "Projects", val: PROJECTS.length, sub: "total" },
-          { label: "HAR Accuracy", val: "92.4%", sub: "CNN/LSTM" },
           { label: "Grad Year", val: "2026", sub: "June" },
           { label: "CGPA", val: "7.62", sub: "out of 10" },
           { label: "Internships", val: "3", sub: "completed" },
@@ -1140,7 +1210,7 @@ function ProfileView({ toast }) {
           >
             <div
               style={{
-                fontSize: 26, // Increased from 22
+                fontSize: 26,
                 fontFamily: "'VT323',monospace",
                 color: T.bright,
               }}
@@ -1148,14 +1218,9 @@ function ProfileView({ toast }) {
               {s.val}
             </div>
             <div style={{ fontSize: 11, color: T.dim, marginTop: 1 }}>
-              {" "}
-              {/* Increased from 9 */}
               {s.label}
             </div>
-            {/* CHANGED COLOR TO WHITE HERE */}
             <div style={{ fontSize: 11, color: "#ffffff", marginTop: 1 }}>
-              {" "}
-              {/* Increased from 9 */}
               {s.sub}
             </div>
           </Card>
@@ -1210,13 +1275,7 @@ function ProjectsView({ bookmarks, setBookmarks, toast }) {
           >
             {bk ? "[★] Saved" : "[☆] Save"}
           </Btn>
-          <Btn
-            onClick={() => {
-              copyToClipboard(p.url, toast);
-            }}
-          >
-            Copy Link
-          </Btn>
+          <Btn onClick={() => copyToClipboard(p.url, toast)}>Copy Link</Btn>
         </div>
         <Card>
           <div
@@ -1336,9 +1395,6 @@ function ProjectsView({ bookmarks, setBookmarks, toast }) {
               {p.tags.map((t) => (
                 <Tag key={t} l={t} />
               ))}
-            </div>
-            <div style={{ marginTop: 8, color: T.dim, fontSize: 10 }}>
-              [↵] Open &nbsp; [↗] GitHub
             </div>
           </Card>
         );
@@ -1621,7 +1677,7 @@ function JournalView({ toast }) {
       >
         <SH t="Dev Journal" />
         <Btn onClick={() => setWriting((w) => !w)} style={{ marginBottom: 10 }}>
-          {writing ? "[ESC] Cancel" : "[W] Write Entry"}
+          {writing ? "[ESC] Cancel" : "[W] Write"}
         </Btn>
       </div>
       {writing && (
@@ -1737,7 +1793,7 @@ function JournalView({ toast }) {
 }
 
 // ─── CONTACT ──────────────────────────────────────────────────────────────────
-function ContactView({ toast }) {
+function ContactView({ toast, isMobile }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
@@ -1759,7 +1815,7 @@ function ContactView({ toast }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
           gap: 8,
           marginBottom: 10,
         }}
@@ -1808,7 +1864,9 @@ function ContactView({ toast }) {
           </Card>
         ))}
       </div>
-      <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+      <div
+        style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}
+      >
         <Btn
           onClick={() => copyToClipboard("Sohail.khan196in@gmail.com", toast)}
         >
@@ -1867,45 +1925,35 @@ function ContactView({ toast }) {
             onChange={(e) => setMsg(e.target.value)}
           />
           <div style={{ display: "flex", gap: 6 }}>
-            {/* --- EMAILJS INTEGRATION STARTS HERE --- */}
             <Btn
               variant="primary"
               onClick={() => {
                 if (name && msg) {
-                  const templateParams = {
-                    from_name: name,
-                    reply_to: email,
-                    message: msg,
-                    to_email: "Sohail.khan196in@gmail.com",
-                  };
-
                   emailjs
                     .send(
-                      "service_u27zfys", // <-- Replace this
-                      "template_7wafwzb", // <-- Replace this
-                      templateParams,
-                      "ehlelRhE9QIOJpwuB", // <-- Replace this
+                      "service_u27zfys",
+                      "template_7wafwzb",
+                      {
+                        from_name: name,
+                        reply_to: email,
+                        message: msg,
+                        to_email: "Sohail.khan196in@gmail.com",
+                      },
+                      "ehlelRhE9QIOJpwuB",
                     )
-                    .then((response) => {
+                    .then(() => {
                       setSent(true);
                       toast("📡 Message transmitted!");
                       setName("");
                       setEmail("");
                       setMsg("");
                     })
-                    .catch((err) => {
-                      console.error("FAILED...", err);
-                      toast("Transmission failed.");
-                    });
-                } else {
-                  toast("Fill in name and message first.");
-                }
+                    .catch(() => toast("Transmission failed."));
+                } else toast("Fill in name and message first.");
               }}
             >
               [↵] Transmit
             </Btn>
-            {/* --- EMAILJS INTEGRATION ENDS HERE --- */}
-
             <Btn
               onClick={() => {
                 setName("");
@@ -1918,7 +1966,6 @@ function ContactView({ toast }) {
           </div>
         </Card>
       )}
-
       <SH t="Availability" />
       <Card>
         <div
@@ -1947,8 +1994,7 @@ function ContactView({ toast }) {
         <div style={{ color: T.text, fontSize: 12, lineHeight: 1.7 }}>
           Actively looking for full-time SWE / AI roles starting June 2026.
           <br />
-          Also open to: remote internships · freelance projects · open-source
-          collaboration.
+          Also open to: remote internships · freelance · open-source collab.
         </div>
         <div
           style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}
@@ -1961,15 +2007,6 @@ function ContactView({ toast }) {
           </Btn>
           <Btn onClick={() => openLink("https://linkedin.com/in/sohail0")}>
             LinkedIn
-          </Btn>
-          <Btn
-            onClick={() =>
-              toast(
-                "📋 Availability: June 2026 onwards · Remote / Hybrid / On-site",
-              )
-            }
-          >
-            View Schedule
           </Btn>
         </div>
       </Card>
@@ -2041,12 +2078,455 @@ const NAV = [
   { key: "profile", label: "Profile", icon: "◉", sc: "p" },
   { key: "projects", label: "Projects", icon: "⬡", sc: "r" },
   { key: "skills", label: "Skills", icon: "◈", sc: "s" },
-  { key: "experience", label: "Experience", icon: "⌖", sc: "x" },
+  { key: "experience", label: "XP", icon: "⌖", sc: "x" },
   { key: "journal", label: "Journal", icon: "✦", sc: "j" },
   { key: "contact", label: "Contact", icon: "✉", sc: "c" },
   { key: "terminal", label: "Terminal", icon: "$", sc: "t" },
-  { key: "bookmarks", label: "Bookmarks", icon: "★", sc: "b" },
+  { key: "bookmarks", label: "Saved", icon: "★", sc: "b" },
 ];
+
+// ─── MOBILE BOTTOM TAB BAR ────────────────────────────────────────────────────
+function MobileTabBar({ view, nav, bookmarks }) {
+  // Show 5 primary tabs + a "more" concept via last slot cycling
+  const PRIMARY = NAV.slice(0, 5);
+  return (
+    <div
+      style={{
+        height: 56,
+        background: T.panel,
+        borderTop: `1px solid ${T.border}`,
+        display: "flex",
+        alignItems: "stretch",
+        flexShrink: 0,
+        zIndex: 200,
+      }}
+    >
+      {PRIMARY.map((item) => {
+        const active = view === item.key;
+        return (
+          <div
+            key={item.key}
+            onClick={() => nav(item.key)}
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 3,
+              cursor: "pointer",
+              borderTop: `2px solid ${active ? T.bright : "transparent"}`,
+              background: active ? "#1c1200" : "transparent",
+              transition: "all 0.1s",
+            }}
+          >
+            <span style={{ fontSize: 16, color: active ? T.bright : T.dim }}>
+              {item.icon}
+            </span>
+            <span
+              style={{
+                fontSize: 9,
+                color: active ? T.bright : T.dim,
+                letterSpacing: 0.5,
+              }}
+            >
+              {item.label}
+            </span>
+            {item.key === "bookmarks" && bookmarks.length > 0 && (
+              <span
+                style={{
+                  position: "absolute",
+                  top: 6,
+                  fontSize: 8,
+                  color: T.bright,
+                  border: `1px solid ${T.border}`,
+                  padding: "0 2px",
+                }}
+              >
+                {bookmarks.length}
+              </span>
+            )}
+          </div>
+        );
+      })}
+      {/* "More" slot cycles remaining views */}
+      <MoreTab view={view} nav={nav} />
+    </div>
+  );
+}
+
+function MoreTab({ view, nav }) {
+  const SECONDARY = NAV.slice(5);
+  const [open, setOpen] = useState(false);
+  const isActive = SECONDARY.some((x) => x.key === view);
+  return (
+    <div style={{ flex: 1, position: "relative" }}>
+      <div
+        onClick={() => setOpen((o) => !o)}
+        style={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 3,
+          cursor: "pointer",
+          borderTop: `2px solid ${isActive ? T.bright : "transparent"}`,
+          background: isActive ? "#1c1200" : "transparent",
+        }}
+      >
+        <span style={{ fontSize: 16, color: isActive ? T.bright : T.dim }}>
+          ···
+        </span>
+        <span style={{ fontSize: 9, color: isActive ? T.bright : T.dim }}>
+          More
+        </span>
+      </div>
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: "100%",
+            right: 0,
+            background: T.panel,
+            border: `1px solid ${T.dim}`,
+            width: 130,
+            animation: "fadeIn 0.15s ease",
+            zIndex: 500,
+          }}
+        >
+          {SECONDARY.map((item) => (
+            <div
+              key={item.key}
+              onClick={() => {
+                nav(item.key);
+                setOpen(false);
+              }}
+              style={{
+                padding: "10px 14px",
+                borderBottom: `1px solid ${T.border}`,
+                color: view === item.key ? T.bright : T.dim,
+                fontSize: 12,
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = T.ghost)}
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "transparent")
+              }
+            >
+              <span>{item.icon}</span>
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── DESKTOP SIDEBAR ──────────────────────────────────────────────────────────
+function Sidebar({ view, nav, bookmarks, setPalette }) {
+  return (
+    <div
+      style={{
+        width: 158,
+        background: T.panel,
+        borderRight: `1px solid ${T.border}`,
+        display: "flex",
+        flexDirection: "column",
+        flexShrink: 0,
+      }}
+    >
+      <div
+        style={{
+          padding: "14px 14px 12px",
+          borderBottom: `1px solid ${T.border}`,
+          cursor: "pointer",
+        }}
+        onClick={() => nav("profile")}
+      >
+        <div
+          style={{
+            fontFamily: "'VT323',monospace",
+            fontSize: 22,
+            color: T.bright,
+            letterSpacing: 2,
+            animation: "glow 3s infinite",
+          }}
+        >
+          S☉hail
+        </div>
+        <div style={{ color: T.dim, fontSize: 9, marginTop: 1 }}>
+          v1.0.0 · portfolio
+        </div>
+      </div>
+      <div style={{ flex: 1, overflowY: "auto", paddingTop: 8 }}>
+        {NAV.map((item) => {
+          const active = view === item.key;
+          return (
+            <div
+              key={item.key}
+              onClick={() => nav(item.key)}
+              style={{
+                padding: "7px 14px",
+                cursor: "pointer",
+                color: active ? T.bright : T.dim,
+                background: active ? "#1c1200" : "transparent",
+                borderLeft: `2px solid ${active ? T.bright : "transparent"}`,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                transition: "all 0.1s",
+                fontSize: 13,
+              }}
+              onMouseEnter={(e) => {
+                if (!active) {
+                  e.currentTarget.style.color = T.amber;
+                  e.currentTarget.style.background = T.ghost;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!active) {
+                  e.currentTarget.style.color = T.dim;
+                  e.currentTarget.style.background = "transparent";
+                }
+              }}
+            >
+              <span style={{ display: "flex", gap: 7, alignItems: "center" }}>
+                <span style={{ fontSize: 11, opacity: 0.7 }}>{item.icon}</span>
+                {item.label}
+              </span>
+              {item.key === "bookmarks" && bookmarks.length > 0 && (
+                <span
+                  style={{
+                    color: T.bright,
+                    fontSize: 9,
+                    border: `1px solid ${T.border}`,
+                    padding: "0 3px",
+                  }}
+                >
+                  {bookmarks.length}
+                </span>
+              )}
+              {item.key === "journal" && (
+                <span
+                  style={{
+                    color: T.dim,
+                    fontSize: 9,
+                    border: `1px solid ${T.border}`,
+                    padding: "0 3px",
+                  }}
+                >
+                  {JOURNALS.length}
+                </span>
+              )}
+              {item.key === "projects" && (
+                <span
+                  style={{
+                    color: T.dim,
+                    fontSize: 9,
+                    border: `1px solid ${T.border}`,
+                    padding: "0 3px",
+                  }}
+                >
+                  {PROJECTS.length}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ borderTop: `1px solid ${T.border}` }}>
+        <div
+          style={{
+            padding: "8px 14px",
+            cursor: "pointer",
+            color: T.dim,
+            fontSize: 10,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+          onClick={() => setPalette(true)}
+          onMouseEnter={(e) => (e.currentTarget.style.color = T.amber)}
+          onMouseLeave={(e) => (e.currentTarget.style.color = T.dim)}
+        >
+          <span>Commands</span>
+          <span
+            style={{
+              border: `1px solid ${T.border}`,
+              padding: "0 4px",
+              fontSize: 9,
+            }}
+          >
+            ⌘K
+          </span>
+        </div>
+        <div style={{ padding: "6px 14px 10px", display: "flex", gap: 12 }}>
+          {[
+            { icon: "⬡", url: "https://github.com/sohail700", tip: "GitHub" },
+            {
+              icon: "◈",
+              url: "https://linkedin.com/in/sohail0",
+              tip: "LinkedIn",
+            },
+            {
+              icon: "✉",
+              url: "mailto:Sohail.khan196in@gmail.com",
+              tip: "Email",
+            },
+          ].map((s) => (
+            <span
+              key={s.icon}
+              title={s.tip}
+              onClick={() => openLink(s.url)}
+              style={{
+                cursor: "pointer",
+                color: T.dim,
+                fontSize: 16,
+                transition: "color 0.1s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = T.bright)}
+              onMouseLeave={(e) => (e.currentTarget.style.color = T.dim)}
+            >
+              {s.icon}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── MOBILE DRAWER SIDEBAR ────────────────────────────────────────────────────
+function MobileDrawer({ view, nav, bookmarks, open, onClose }) {
+  if (!open) return null;
+  return (
+    <>
+      <div
+        onClick={onClose}
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.7)",
+          zIndex: 3000,
+        }}
+      />
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          bottom: 0,
+          width: 220,
+          background: T.panel,
+          borderRight: `1px solid ${T.dim}`,
+          zIndex: 3001,
+          animation: "slideIn 0.2s ease",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <div
+          style={{
+            padding: "14px 14px 12px",
+            borderBottom: `1px solid ${T.border}`,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "'VT323',monospace",
+              fontSize: 22,
+              color: T.bright,
+              letterSpacing: 2,
+              animation: "glow 3s infinite",
+            }}
+          >
+            S☉hail
+          </div>
+          <span
+            style={{ color: T.dim, cursor: "pointer", fontSize: 18 }}
+            onClick={onClose}
+          >
+            ✕
+          </span>
+        </div>
+        <div style={{ flex: 1, overflowY: "auto", paddingTop: 8 }}>
+          {NAV.map((item) => {
+            const active = view === item.key;
+            return (
+              <div
+                key={item.key}
+                onClick={() => {
+                  nav(item.key);
+                  onClose();
+                }}
+                style={{
+                  padding: "10px 16px",
+                  cursor: "pointer",
+                  color: active ? T.bright : T.dim,
+                  background: active ? "#1c1200" : "transparent",
+                  borderLeft: `2px solid ${active ? T.bright : "transparent"}`,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  fontSize: 14,
+                }}
+              >
+                <span style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <span style={{ fontSize: 13 }}>{item.icon}</span>
+                  {item.label}
+                </span>
+                {item.key === "bookmarks" && bookmarks.length > 0 && (
+                  <span
+                    style={{
+                      color: T.bright,
+                      fontSize: 10,
+                      border: `1px solid ${T.border}`,
+                      padding: "0 4px",
+                    }}
+                  >
+                    {bookmarks.length}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div
+          style={{
+            padding: "12px 16px",
+            borderTop: `1px solid ${T.border}`,
+            display: "flex",
+            gap: 16,
+          }}
+        >
+          {[
+            { icon: "⬡", url: "https://github.com/sohail700" },
+            { icon: "◈", url: "https://linkedin.com/in/sohail0" },
+            { icon: "✉", url: "mailto:Sohail.khan196in@gmail.com" },
+          ].map((s) => (
+            <span
+              key={s.icon}
+              onClick={() => openLink(s.url)}
+              style={{ cursor: "pointer", color: T.dim, fontSize: 20 }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = T.bright)}
+              onMouseLeave={(e) => (e.currentTarget.style.color = T.dim)}
+            >
+              {s.icon}
+            </span>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
 
 // ─── APP ROOT ─────────────────────────────────────────────────────────────────
 export default function App() {
@@ -2055,6 +2535,7 @@ export default function App() {
   const [palette, setPalette] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [settOpen, setSettOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [notifs, setNotifs] = useState(NOTIFS_INIT);
   const [bookmarks, setBookmarksRaw] = useState(() => {
@@ -2077,6 +2558,9 @@ export default function App() {
     flicker: true,
     brightness: 88,
   });
+
+  const windowWidth = useWindowWidth();
+  const isMobile = windowWidth < 640;
 
   const toast = useCallback((msg) => {
     const id = Date.now();
@@ -2107,6 +2591,7 @@ export default function App() {
         setPalette(false);
         setNotifOpen(false);
         setSettOpen(false);
+        setDrawerOpen(false);
       }
       if (e.key === "\\") {
         setSett((s) => ({ ...s, scanlines: !s.scanlines }));
@@ -2122,11 +2607,12 @@ export default function App() {
     setPalette(false);
     setNotifOpen(false);
     setSettOpen(false);
+    setDrawerOpen(false);
   };
   const unread = notifs.filter((n) => !n.read).length;
 
   const VIEWS = {
-    profile: <ProfileView toast={toast} />,
+    profile: <ProfileView toast={toast} isMobile={isMobile} />,
     projects: (
       <ProjectsView
         bookmarks={bookmarks}
@@ -2137,7 +2623,7 @@ export default function App() {
     skills: <SkillsView />,
     experience: <ExperienceView />,
     journal: <JournalView toast={toast} />,
-    contact: <ContactView toast={toast} />,
+    contact: <ContactView toast={toast} isMobile={isMobile} />,
     terminal: <Terminal toast={toast} />,
     bookmarks: (
       <BookmarksView
@@ -2162,14 +2648,12 @@ export default function App() {
           filter: `brightness(${sett.brightness}%)`,
           animation: sett.flicker ? "flicker 10s infinite" : "none",
           fontFamily: "'Share Tech Mono',monospace",
-          fontSize: 14, // <-- CHANGED FROM 13 TO 16
-          zoom: 1, // <-- ADDED THIS LINE
+          fontSize: 14,
           color: T.text,
           position: "relative",
           overflow: "hidden",
         }}
       >
-        {/* Scanlines */}
         {/* Scanlines */}
         {sett.scanlines && (
           <div
@@ -2187,78 +2671,109 @@ export default function App() {
         {/* Top bar */}
         <div
           style={{
-            height: 32,
+            height: 36,
             background: T.panel,
             borderBottom: `1px solid ${T.border}`,
             display: "flex",
             alignItems: "center",
-            padding: "0 14px",
+            padding: "0 12px",
             gap: 8,
             flexShrink: 0,
             zIndex: 100,
           }}
         >
-          <span
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              background: "#FF5F57",
-              display: "inline-block",
-              cursor: "pointer",
-            }}
-            title="Close"
-            onClick={() =>
-              toast("You can't close the portfolio that easily 👀")
-            }
-          />
-          <span
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              background: "#FFBD2E",
-              display: "inline-block",
-              cursor: "pointer",
-            }}
-            title="Minimize"
-            onClick={() => toast("Minimized to the void.")}
-          />
-          <span
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              background: "#28C840",
-              display: "inline-block",
-              cursor: "pointer",
-            }}
-            title="Fullscreen"
-            onClick={() => {
-              document.documentElement.requestFullscreen?.();
-              toast("Entering fullscreen...");
-            }}
-          />
+          {/* Hamburger on mobile */}
+          {isMobile ? (
+            <span
+              onClick={() => {
+                setDrawerOpen(true);
+                setNotifOpen(false);
+                setSettOpen(false);
+              }}
+              style={{
+                color: T.dim,
+                fontSize: 18,
+                cursor: "pointer",
+                lineHeight: 1,
+                padding: "0 2px",
+              }}
+            >
+              ☰
+            </span>
+          ) : (
+            <>
+              <span
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  background: "#FF5F57",
+                  display: "inline-block",
+                  cursor: "pointer",
+                }}
+                onClick={() =>
+                  toast("You can't close the portfolio that easily 👀")
+                }
+              />
+              <span
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  background: "#FFBD2E",
+                  display: "inline-block",
+                  cursor: "pointer",
+                }}
+                onClick={() => toast("Minimized to the void.")}
+              />
+              <span
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  background: "#28C840",
+                  display: "inline-block",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  document.documentElement.requestFullscreen?.();
+                  toast("Entering fullscreen...");
+                }}
+              />
+            </>
+          )}
+
           <div
             style={{
               flex: 1,
               textAlign: "center",
               color: T.dim,
-              fontSize: 11,
-              letterSpacing: 2,
+              fontSize: isMobile ? 9 : 11,
+              letterSpacing: isMobile ? 1 : 2,
               cursor: "pointer",
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              textOverflow: "ellipsis",
             }}
             onClick={() => toast("◎ portfolio.sohail.online")}
           >
-            ◎ portfolio.sohail.online
+            {isMobile ? "sohail.online" : "◎ portfolio.sohail.online"}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: isMobile ? 10 : 14,
+            }}
+          >
             {/* Notifications */}
             <div
               style={{ position: "relative", cursor: "pointer" }}
               onClick={() => {
                 setNotifOpen((n) => !n);
                 setSettOpen(false);
+                setDrawerOpen(false);
               }}
             >
               <span
@@ -2300,13 +2815,16 @@ export default function App() {
               onClick={() => {
                 setSettOpen((s) => !s);
                 setNotifOpen(false);
+                setDrawerOpen(false);
               }}
             >
               ⚙
             </span>
-            <span style={{ color: T.dim, fontSize: 11 }}>
-              {time.toLocaleTimeString("en-US", { hour12: false })}
-            </span>
+            {!isMobile && (
+              <span style={{ color: T.dim, fontSize: 11 }}>
+                {time.toLocaleTimeString("en-US", { hour12: false })}
+              </span>
+            )}
           </div>
         </div>
 
@@ -2316,6 +2834,7 @@ export default function App() {
             notifs={notifs}
             setNotifs={setNotifs}
             onClose={() => setNotifOpen(false)}
+            isMobile={isMobile}
           />
         )}
         {settOpen && (
@@ -2323,203 +2842,34 @@ export default function App() {
             s={sett}
             setS={setSett}
             onClose={() => setSettOpen(false)}
+            isMobile={isMobile}
+          />
+        )}
+
+        {/* Mobile Drawer */}
+        {isMobile && (
+          <MobileDrawer
+            view={view}
+            nav={nav}
+            bookmarks={bookmarks}
+            open={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
           />
         )}
 
         {/* Body */}
         <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-          {/* Sidebar */}
-          <div
-            style={{
-              width: 158,
-              background: T.panel,
-              borderRight: `1px solid ${T.border}`,
-              display: "flex",
-              flexDirection: "column",
-              flexShrink: 0,
-            }}
-          >
-            {/* Logo */}
-            <div
-              style={{
-                padding: "14px 14px 12px",
-                borderBottom: `1px solid ${T.border}`,
-                cursor: "pointer",
-              }}
-              onClick={() => nav("profile")}
-            >
-              <div
-                style={{
-                  fontFamily: "'VT323',monospace",
-                  fontSize: 22,
-                  color: T.bright,
-                  letterSpacing: 2,
-                  animation: "glow 3s infinite",
-                }}
-              >
-                S☉hail
-              </div>
-              <div style={{ color: T.dim, fontSize: 9, marginTop: 1 }}>
-                v1.0.0 · portfolio
-              </div>
-            </div>
+          {/* Desktop Sidebar */}
+          {!isMobile && (
+            <Sidebar
+              view={view}
+              nav={nav}
+              bookmarks={bookmarks}
+              setPalette={setPalette}
+            />
+          )}
 
-            {/* Nav */}
-            <div style={{ flex: 1, overflowY: "auto", paddingTop: 8 }}>
-              {NAV.map((item) => {
-                const active = view === item.key;
-                return (
-                  <div
-                    key={item.key}
-                    onClick={() => nav(item.key)}
-                    style={{
-                      padding: "7px 14px",
-                      cursor: "pointer",
-                      color: active ? T.bright : T.dim,
-                      background: active ? "#1c1200" : "transparent",
-                      borderLeft: `2px solid ${active ? T.bright : "transparent"}`,
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      transition: "all 0.1s",
-                      fontSize: 13,
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!active) {
-                        e.currentTarget.style.color = T.amber;
-                        e.currentTarget.style.background = T.ghost;
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!active) {
-                        e.currentTarget.style.color = T.dim;
-                        e.currentTarget.style.background = "transparent";
-                      }
-                    }}
-                  >
-                    <span
-                      style={{ display: "flex", gap: 7, alignItems: "center" }}
-                    >
-                      <span style={{ fontSize: 11, opacity: 0.7 }}>
-                        {item.icon}
-                      </span>
-                      {item.label}
-                    </span>
-                    {item.key === "bookmarks" && bookmarks.length > 0 && (
-                      <span
-                        style={{
-                          color: T.bright,
-                          fontSize: 9,
-                          border: `1px solid ${T.border}`,
-                          padding: "0 3px",
-                        }}
-                      >
-                        {bookmarks.length}
-                      </span>
-                    )}
-                    {item.key === "journal" && (
-                      <span
-                        style={{
-                          color: T.dim,
-                          fontSize: 9,
-                          border: `1px solid ${T.border}`,
-                          padding: "0 3px",
-                        }}
-                      >
-                        {JOURNALS.length}
-                      </span>
-                    )}
-                    {item.key === "projects" && (
-                      <span
-                        style={{
-                          color: T.dim,
-                          fontSize: 9,
-                          border: `1px solid ${T.border}`,
-                          padding: "0 3px",
-                        }}
-                      >
-                        {PROJECTS.length}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Bottom sidebar */}
-            <div style={{ borderTop: `1px solid ${T.border}` }}>
-              <div
-                style={{
-                  padding: "8px 14px",
-                  cursor: "pointer",
-                  color: T.dim,
-                  fontSize: 10,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-                onClick={() => setPalette(true)}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = T.amber;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = T.dim;
-                }}
-              >
-                <span>Commands</span>
-                <span
-                  style={{
-                    border: `1px solid ${T.border}`,
-                    padding: "0 4px",
-                    fontSize: 9,
-                  }}
-                >
-                  ⌘K
-                </span>
-              </div>
-              <div
-                style={{ padding: "6px 14px 10px", display: "flex", gap: 12 }}
-              >
-                {[
-                  {
-                    icon: "⬡",
-                    url: "https://github.com/sohail700",
-                    tip: "GitHub",
-                  },
-                  {
-                    icon: "◈",
-                    url: "https://linkedin.com/in/sohail0",
-                    tip: "LinkedIn",
-                  },
-                  {
-                    icon: "✉",
-                    url: "mailto:Sohail.khan196in@gmail.com",
-                    tip: "Email",
-                  },
-                ].map((s) => (
-                  <span
-                    key={s.icon}
-                    title={s.tip}
-                    onClick={() => openLink(s.url)}
-                    style={{
-                      cursor: "pointer",
-                      color: T.dim,
-                      fontSize: 16,
-                      transition: "color 0.1s",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.color = T.bright)
-                    }
-                    onMouseLeave={(e) => (e.currentTarget.style.color = T.dim)}
-                  >
-                    {s.icon}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Main */}
+          {/* Main Content */}
           <div
             style={{
               flex: 1,
@@ -2528,9 +2878,10 @@ export default function App() {
               overflow: "hidden",
             }}
           >
+            {/* Breadcrumb bar */}
             <div
               style={{
-                padding: "8px 18px",
+                padding: isMobile ? "6px 12px" : "8px 18px",
                 borderBottom: `1px solid ${T.border}`,
                 display: "flex",
                 justifyContent: "space-between",
@@ -2541,7 +2892,7 @@ export default function App() {
               <span
                 style={{
                   color: T.bright,
-                  letterSpacing: 4,
+                  letterSpacing: 3,
                   fontSize: 10,
                   textTransform: "uppercase",
                 }}
@@ -2555,16 +2906,18 @@ export default function App() {
                     Hire Me
                   </Btn>
                 )}
-                {view !== "profile" && (
+                {!isMobile && view !== "profile" && (
                   <Btn onClick={() => nav("profile")}>Profile</Btn>
                 )}
               </div>
             </div>
+
+            {/* View Content */}
             <div
               style={{
                 flex: 1,
                 overflowY: view === "terminal" ? "hidden" : "auto",
-                padding: "14px 18px",
+                padding: isMobile ? "12px" : "14px 18px",
                 display: view === "terminal" ? "flex" : "block",
                 flexDirection: "column",
               }}
@@ -2574,68 +2927,72 @@ export default function App() {
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div
-          style={{
-            height: 26,
-            background: T.panel,
-            borderTop: `1px solid ${T.border}`,
-            display: "flex",
-            alignItems: "center",
-            padding: "0 12px",
-            gap: 12,
-            flexShrink: 0,
-            fontSize: 10,
-            color: T.dim,
-            overflowX: "auto",
-          }}
-        >
-          {[
-            { label: "[⌘K] Palette", fn: () => setPalette(true) },
-            { label: "[P] Profile", fn: () => nav("profile") },
-            { label: "[R] Projects", fn: () => nav("projects") },
-            { label: "[S] Skills", fn: () => nav("skills") },
-            { label: "[X] XP", fn: () => nav("experience") },
-            { label: "[J] Journal", fn: () => nav("journal") },
-            { label: "[C] Contact", fn: () => nav("contact") },
-            { label: "[T] Terminal", fn: () => nav("terminal") },
-            {
-              label: "[\\] Scanlines",
-              fn: () => {
-                setSett((s) => ({ ...s, scanlines: !s.scanlines }));
-                toast("Scanlines toggled");
-              },
-            },
-          ].map((s) => (
-            <span
-              key={s.label}
-              onClick={s.fn}
-              style={{ whiteSpace: "nowrap", cursor: "pointer" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = T.amber)}
-              onMouseLeave={(e) => (e.currentTarget.style.color = T.dim)}
-            >
-              {s.label}
-            </span>
-          ))}
-          <span style={{ flex: 1 }} />
-          <span
+        {/* Bottom — Desktop shortcut bar / Mobile tab bar */}
+        {isMobile ? (
+          <MobileTabBar view={view} nav={nav} bookmarks={bookmarks} />
+        ) : (
+          <div
             style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: T.success,
-              display: "inline-block",
-              animation: "pulse 2s infinite",
+              height: 26,
+              background: T.panel,
+              borderTop: `1px solid ${T.border}`,
+              display: "flex",
+              alignItems: "center",
+              padding: "0 12px",
+              gap: 12,
+              flexShrink: 0,
+              fontSize: 10,
+              color: T.dim,
+              overflowX: "auto",
             }}
-          />
-          <span style={{ color: T.amber }}>@sohail_khan</span>
-        </div>
+          >
+            {[
+              { label: "[⌘K] Palette", fn: () => setPalette(true) },
+              { label: "[P] Profile", fn: () => nav("profile") },
+              { label: "[R] Projects", fn: () => nav("projects") },
+              { label: "[S] Skills", fn: () => nav("skills") },
+              { label: "[X] XP", fn: () => nav("experience") },
+              { label: "[J] Journal", fn: () => nav("journal") },
+              { label: "[C] Contact", fn: () => nav("contact") },
+              { label: "[T] Terminal", fn: () => nav("terminal") },
+              {
+                label: "[\\] Scanlines",
+                fn: () => {
+                  setSett((s) => ({ ...s, scanlines: !s.scanlines }));
+                  toast("Scanlines toggled");
+                },
+              },
+            ].map((s) => (
+              <span
+                key={s.label}
+                onClick={s.fn}
+                style={{ whiteSpace: "nowrap", cursor: "pointer" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = T.amber)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = T.dim)}
+              >
+                {s.label}
+              </span>
+            ))}
+            <span style={{ flex: 1 }} />
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: T.success,
+                display: "inline-block",
+                animation: "pulse 2s infinite",
+              }}
+            />
+            <span style={{ color: T.amber }}>@sohail_khan</span>
+          </div>
+        )}
       </div>
 
       {palette && (
         <CommandPalette onClose={() => setPalette(false)} onNav={nav} />
       )}
-      <Toasts items={toasts} />
+      <Toasts items={toasts} isMobile={isMobile} />
     </>
   );
 }
