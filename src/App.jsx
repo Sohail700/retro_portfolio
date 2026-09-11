@@ -1928,7 +1928,7 @@ function ContactView({ toast, isMobile }) {
           />
           <input
             style={inp}
-            placeholder="Reply-To: your@email.com"
+            placeholder="Your Email - Your@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
